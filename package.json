@@ -1,0 +1,17 @@
+{
+  "name": "electrum-crypto",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:kaplanmaxe/electrum-crypto.git",
+  "author": "Max Kaplan <kaplanmaxe3@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^9.6.2",
+    "tslint-kaplankomputing": "^1.0.0",
+    "typescript": "^2.8.1"
+  },
+  "scripts": {
+    "compile": "tsc",
+    "compile:watch": "tsc -w"
+  }
+}
