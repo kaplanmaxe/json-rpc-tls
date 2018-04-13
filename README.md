@@ -1,3 +1,3 @@
-# electrum-crypto
+# json-rpc-tls
 
-Library for communicating with electrum servers with Node
+Library for communinicationg over a TLS Socket via JSON RPC

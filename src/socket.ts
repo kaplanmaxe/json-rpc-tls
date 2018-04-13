@@ -1,7 +1,6 @@
 import * as tls from 'tls';
-import * as net from 'net';
-
-export type Protocol = 'tls' | 'tcp';
+import * as fs from 'fs';
+import { exec } from 'child_process';
 
 export interface ISocketCallbacks {
   onClose: (data: any) => void;
@@ -9,73 +8,66 @@ export interface ISocketCallbacks {
   onData: (chunk: any) => void;
   onEnd: (e: any) => void;
   onError: (e: Error) => void;
+  onSocketConnection: (socket: tls.TLSSocket) => void;
 }
 
 const TIMEOUT = 10000;
 
 class Socket {
 
-  public options: any;
-  public socket: tls.TLSSocket;
-  public host: string;
-  public port: number;
-  public protocol: Protocol;
+  static tlsSocket(
+    host: string,
+    port: number,
+    callbacks: ISocketCallbacks,
+    options?: tls.TlsOptions,
+  ) {
+    try {
+      const socket: tls.TLSSocket = tls.connect(port, host, options, () => {
+        socket.setTimeout(TIMEOUT);
+        socket.setEncoding('utf8');
+        socket.setKeepAlive(true, 0);
+        socket.setNoDelay(true);
 
-  constructor(host: string, port: number, protocol: Protocol, callbacks: ISocketCallbacks, options?: any) {
-    this.options = options;
-    this.host = host;
-    this.port = port;
-    this.protocol = protocol;
+        socket.on('close', (data) => {
+          callbacks.onClose(data);
+        });
 
-    if (this.protocol === 'tls') {
-      this.socket = new tls.TLSSocket(options);
+        socket.on('timeout', (error) => {
+          callbacks.onTimeout(new Error(error));
+        });
+
+        socket.on('data', (chunk) => {
+          callbacks.onData(chunk);
+        });
+
+        socket.on('end', (e) => {
+          callbacks.onEnd(e);
+        });
+
+        socket.on('error', (e) => {
+          callbacks.onError(new Error(e));
+        });
+
+        callbacks.onSocketConnection(socket);
+      });
+    } catch {
+      return new Error('Error establishing tls socket');
     }
-
-    this.socket.setTimeout(TIMEOUT);
-    this.socket.setEncoding('utf8');
-    this.socket.setKeepAlive(true, 0);
-    this.socket.setNoDelay(true);
-
-    this.socket.on('close', (data) => {
-      callbacks.onClose(data);
-    });
-
-    this.socket.on('timeout', (error) => {
-      callbacks.onTimeout(new Error(error));
-    });
-
-    this.socket.on('data', (chunk) => {
-      callbacks.onData(chunk);
-    });
-
-    this.socket.on('end', (e) => {
-      callbacks.onEnd(e);
-    });
-
-    this.socket.on('error', (e) => {
-      callbacks.onError(new Error(e));
-    });
   }
 
-  async connect() {
-    this.socket.connect(this.port, this.host, () => {
-      return true;
-    });
-  }
-
-  request(method: string, params: [string] = ['']) {
+  static request(socket: tls.TLSSocket, method: string, params: string[] = []) {
     const body = JSON.stringify({
         jsonrpc : '2.0',
         method,
         params,
-        id: 1,
+        id: 1, // TODO: dynamically set this
     });
-    this.socket.write(body + '\n');
+    socket.write(body + '\n');
   }
 
-  close() {
-    this.socket.end();
-    this.socket.destroy();
+  static close(socket: tls.TLSSocket) {
+    socket.end();
+    socket.destroy();
   }
 }
 

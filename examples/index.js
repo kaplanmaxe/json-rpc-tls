@@ -2,7 +2,7 @@
 
 const Socket = require('../dist/socket').Socket;
 
-const callbacks = {
+const tlsCallback = {
   onClose: (e) => {
     console.log('onClose', e);
   },
@@ -18,10 +18,9 @@ const callbacks = {
   onError: (e) => {
     console.log('onError', e);
   },
+  onSocketConnection: async (socket) => {
+    Socket.request(socket, 'blockchain.address.get_balance', ['1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa']);
+  },
 };
 
-const socket = new Socket('185.64.116.15', 50002, 'tls', callbacks);
-socket.connect()
-.then(async () => {
-  socket.request('blockchain.address.get_balance', ['1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa']);
-});
+Socket.tlsSocket('185.64.116.15', 50002, tlsCallback);

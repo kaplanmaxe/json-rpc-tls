@@ -1,8 +1,9 @@
 // Typescript example
 
+import * as tls from 'tls';
 import { ISocketCallbacks, Socket } from '../src/socket';
 
-const callbacks: ISocketCallbacks = {
+const tlsCallback: ISocketCallbacks = {
   onClose: (e: any) => {
     console.log('onClose', e);
   },
@@ -18,10 +19,9 @@ const callbacks: ISocketCallbacks = {
   onError: (e: Error) => {
     console.log('onError', e);
   },
+  onSocketConnection: async (socket: tls.TLSSocket) => {
+    Socket.request(socket, 'blockchain.address.get_balance', ['1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa']);
+  },
 };
 
-const socket = new Socket('185.64.116.15', 50002, 'tls', callbacks);
-socket.connect()
-.then(async () => {
-  socket.request('blockchain.address.get_balance', ['1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa']);
-});
+Socket.tlsSocket('185.64.116.15', 50002, tlsCallback);

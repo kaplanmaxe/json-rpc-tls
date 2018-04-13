@@ -1,8 +1,9 @@
 {
-  "name": "electrum-crypto",
+  "name": "json-rpc-tls",
+  "description": "Library for communinicationg over a TLS Socket via JSON RPC",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "git@github.com:kaplanmaxe/electrum-crypto.git",
+  "repository": "git@github.com:kaplanmaxe/json-rpc-tls.git",
   "author": "Max Kaplan <kaplanmaxe3@gmail.com>",
   "license": "MIT",
   "devDependencies": {
