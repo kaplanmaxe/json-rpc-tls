@@ -2,6 +2,16 @@
 
 Library for communinicationg over a TLS Socket via JSON RPC
 
+### Installation
+
+NPM:
+
+`npm install json-rpc-tls`
+
+Yarn:
+
+`yarn add json-rpc-tls`
+
 ### Examples
 
 - [Typescript](./examples/index.ts)
