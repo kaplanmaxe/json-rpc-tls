@@ -2,7 +2,7 @@
   "name": "json-rpc-tls",
   "description": "Library for communinicationg over a TLS Socket via JSON RPC",
   "types": "dist/socket.d.ts",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "dist/socket.js",
   "repository": "git@github.com:kaplanmaxe/json-rpc-tls.git",
   "author": "Max Kaplan <kaplanmaxe3@gmail.com>",
