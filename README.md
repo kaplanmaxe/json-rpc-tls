@@ -1,6 +1,6 @@
 # json-rpc-tls
 
-Library for communinicationg over a TLS Socket via JSON RPC
+Library for communinicationg over a TLS Socket via JSON RPC containing no production dependencies.
 
 ### Installation
 
