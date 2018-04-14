@@ -18,7 +18,7 @@ const tlsCallback = {
   onError: (e) => {
     console.log('onError', e);
   },
-  onSocketConnection: async (socket) => {
+  onSocketConnection: (socket) => {
     // Set options
     socket.setEncoding('utf8');
     socket.setKeepAlive(true, 0);
