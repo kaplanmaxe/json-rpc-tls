@@ -9,16 +9,13 @@ const tlsCallback = {
     console.log('onTimeout', e);
     Socket.close(socket);
   },
-  onData: (chunk) => {
-    console.log('onData', JSON.parse(chunk));
-  },
   onEnd: (e) => {
     console.log('onEnd', e);
   },
   onError: (e) => {
     console.log('onError', e);
   },
-  onSocketConnection: (socket) => {
+  onSocketConnection: async (socket) => {
     // Set options
     socket.setEncoding('utf8');
     socket.setKeepAlive(true, 0);
@@ -32,7 +29,13 @@ const tlsCallback = {
     console.log(Socket.derCertToPemCert(cert));
 
     // Make requests
-    Socket.request(socket, 1, 'blockchain.address.get_balance', ['1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa']);
+    const balance = await Socket.request(
+      socket,
+      1,
+      'blockchain.address.get_balance',
+      ['1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'],
+    );
+    console.log(JSON.parse(balance));
   },
 };
 

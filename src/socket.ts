@@ -21,23 +21,23 @@ class Socket {
       const socket: tls.TLSSocket = tls.connect(port, host, options, () => {
 
         socket.on('close', (data) => {
-          callbacks.onClose(data);
+          if (callbacks.onClose) { callbacks.onClose(data); }
         });
 
         socket.on('timeout', (error) => {
-          callbacks.onTimeout(socket, new Error(error));
+          if (callbacks.onTimeout) { callbacks.onTimeout(socket, error); }
         });
 
         socket.on('data', (chunk) => {
-          callbacks.onData(chunk);
+          if (callbacks.onData) { callbacks.onData(chunk); }
         });
 
         socket.on('end', (e) => {
-          callbacks.onEnd(e);
+          if (callbacks.onEnd) { callbacks.onEnd(e); }
         });
 
         socket.on('error', (e) => {
-          callbacks.onError(new Error(e));
+          if (callbacks.onError) { callbacks.onError(new Error(e)); }
         });
 
         callbacks.onSocketConnection(socket);
@@ -48,13 +48,21 @@ class Socket {
   }
 
   static request(socket: tls.TLSSocket, id: number, method: string, params: string[] = []) {
-    const body = JSON.stringify({
+    return new Promise((resolve, reject) => {
+      const body = JSON.stringify({
         jsonrpc : '2.0',
         id,
         method,
         params,
+      });
+      socket.on('data', (chunk) => {
+        resolve(chunk);
+      });
+      socket.on('error', (e) => {
+        reject(new Error(e));
+      });
+      socket.write(body + '\n');
     });
-    socket.write(body + '\n');
   }
 
   static close(socket: tls.TLSSocket) {
