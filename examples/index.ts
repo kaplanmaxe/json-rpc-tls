@@ -1,11 +1,10 @@
 // Typescript example
 
 import * as tls from 'tls';
-import * as fs from 'fs';
 import { Socket } from '../src/socket';
 
 Socket.tlsSocket('185.64.116.15', 50002, {
-  ca: [ fs.readFileSync('certs/certificate.pem') ],
+  rejectUnauthorized: false,
   checkServerIdentity: () => undefined, // Self signed cert
 }).then(async (socket: tls.TLSSocket) => {
   // Set options

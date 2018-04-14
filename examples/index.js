@@ -1,8 +1,7 @@
-const fs = require('fs');
 const Socket = require('../dist/socket').Socket;
 
-Socket.tlsSocket('185.64.116.151', 50002, {
-  ca: [ fs.readFileSync('certs/certificate.pem') ],
+Socket.tlsSocket('185.64.116.15', 50002, {
+  rejectUnauthorized: false,
   checkServerIdentity: () => undefined, // Self signed cert
 }).then(async (socket) => {
   // Set options
