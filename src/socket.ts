@@ -1,17 +1,13 @@
 import * as tls from 'tls';
-import * as fs from 'fs';
-import { exec } from 'child_process';
 
 export interface ISocketCallbacks {
-  onClose: (data: any) => void;
-  onTimeout: (e: Error) => void;
-  onData: (chunk: any) => void;
-  onEnd: (e: any) => void;
-  onError: (e: Error) => void;
-  onSocketConnection: (socket: tls.TLSSocket) => void;
+  onClose?: (data: any) => void;
+  onTimeout?: (socket: tls.TLSSocket, e: Error) => void;
+  onData?: (chunk: any) => void;
+  onEnd?: (e: any) => void;
+  onError?: (e: Error) => void;
+  onSocketConnection?: (socket: tls.TLSSocket) => void;
 }
-
-const TIMEOUT = 10000;
 
 class Socket {
 
@@ -19,21 +15,17 @@ class Socket {
     host: string,
     port: number,
     callbacks: ISocketCallbacks,
-    options?: tls.TlsOptions,
+    options?: tls.ConnectionOptions,
   ) {
     try {
       const socket: tls.TLSSocket = tls.connect(port, host, options, () => {
-        socket.setTimeout(TIMEOUT);
-        socket.setEncoding('utf8');
-        socket.setKeepAlive(true, 0);
-        socket.setNoDelay(true);
 
         socket.on('close', (data) => {
           callbacks.onClose(data);
         });
 
         socket.on('timeout', (error) => {
-          callbacks.onTimeout(new Error(error));
+          callbacks.onTimeout(socket, new Error(error));
         });
 
         socket.on('data', (chunk) => {
@@ -55,12 +47,12 @@ class Socket {
     }
   }
 
-  static request(socket: tls.TLSSocket, method: string, params: string[] = []) {
+  static request(socket: tls.TLSSocket, id: number, method: string, params: string[] = []) {
     const body = JSON.stringify({
         jsonrpc : '2.0',
+        id,
         method,
         params,
-        id: 1, // TODO: dynamically set this
     });
     socket.write(body + '\n');
   }
@@ -69,6 +61,63 @@ class Socket {
     socket.end();
     socket.destroy();
   }
+
+  static getPeerCertificate(socket: tls.TLSSocket, full: boolean = true) {
+    const cert = socket.getPeerCertificate(full);
+    return cert;
+  }
+
+  static derCertToPemCert(cert: Buffer) {
+    const chars = Buffer.from(cert).toString('base64').split('');
+    let formattedCert = '-----BEGIN CERTIFICATE-----';
+    for (let i = 0; i < chars.length; i++) {
+      if (i % 64 === 0) {
+        formattedCert += '\n';
+      }
+      formattedCert += chars[i];
+    }
+    formattedCert += '\n-----END CERTIFICATE-----';
+    return formattedCert;
+  }
 }
 
 export { Socket };
+
+// const tlsCallback: ISocketCallbacks = {
+//   onClose: (e: any) => {
+//     console.log('onClose', e);
+//   },
+//   onTimeout: (socket: tls.TLSSocket, e: Error) => {
+//     console.log('onTimeout', e);
+//   },
+//   onData: (chunk: any) => {
+//     console.log('onData', JSON.parse(chunk));
+//   },
+//   onEnd: (e: any) => {
+//     console.log('onEnd', e);
+//   },
+//   onError: (e: Error) => {
+//     console.log('onError', e);
+//   },
+//   onSocketConnection: (socket: tls.TLSSocket) => {
+//     // Set options
+//     socket.setEncoding('utf8');
+//     socket.setKeepAlive(true, 0);
+//     socket.setNoDelay(true);
+
+//     // Get peer certificate
+//     const cert = Socket.getPeerCertificate(socket).raw;
+
+//     // Convert DER cert to PEM cert if needed
+//     console.log(Socket.derCertToPemCert(cert));
+
+//     // Make requests
+//     Socket.request(socket, 1, 'blockchain.address.get_balance', ['1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa']);
+//     Socket.request(socket, 2, 'blockchain.address.get_balance', ['1MaxKapqcv8KVHw1mTzZd23uvntnLABvnB']);
+//   },
+// };
+
+// Socket.tlsSocket('185.64.116.15', 50002, tlsCallback, {
+//   ca: [ fs.readFileSync('certs/certificate.pem') ],
+//   checkServerIdentity: () => undefined,
+// });
