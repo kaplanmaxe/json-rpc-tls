@@ -6,7 +6,6 @@ export interface ISocketError {
 }
 
 class Socket {
-
   static tlsSocket(
     host: string,
     port: number,
@@ -32,9 +31,11 @@ class Socket {
       });
       socket.on('data', (chunk) => {
         resolve(chunk);
+        socket.removeAllListeners();
       });
       socket.on('error', (e) => {
         reject(new Error(e));
+        socket.removeAllListeners();
       });
       socket.write(body + '\n');
     });

@@ -3,7 +3,7 @@
 import * as tls from 'tls';
 import { Socket } from '../src/socket';
 
-Socket.tlsSocket('185.64.116.15', 50002, {
+Socket.tlsSocket('electrum.villocq.com', 50002, {
   rejectUnauthorized: false,
   checkServerIdentity: () => undefined, // Self signed cert
 }).then(async (socket: tls.TLSSocket) => {
